@@ -1,0 +1,8 @@
+{
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "endOfLine": "lf",
+  "semi": false,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}

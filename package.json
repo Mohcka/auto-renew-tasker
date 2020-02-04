@@ -1,0 +1,31 @@
+{
+  "name": "typescript-attempt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "start": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^13.5.3",
+    "@types/prompts": "^2.0.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@types/colors": "^1.2.1",
+    "axios": "^0.19.2",
+    "colors": "^1.4.0",
+    "dotenv": "^8.2.0",
+    "fast-xml-parser": "^3.16.0",
+    "googleapis": "^47.0.0",
+    "moment": "^2.24.0",
+    "ora": "^4.0.3",
+    "prompts": "^2.3.0"
+  }
+}
