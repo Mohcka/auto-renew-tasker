@@ -16,7 +16,7 @@ class Main {
   public static async run(): Promise<void> {
     const checker: AutoRenewChecker = new AutoRenewChecker()
 
-    await checker.runTest()
+    await checker.run()
     console.log("Done")
     // Todo: get validEntries -> get list of domains -> compare valid domains to NC domains for auto renwal
   }

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@types/colors": "^1.2.1",
+    "@types/puppeteer": "^2.0.0",
     "axios": "^0.19.2",
     "colors": "^1.4.0",
     "dotenv": "^8.2.0",
@@ -26,6 +27,7 @@
     "googleapis": "^47.0.0",
     "moment": "^2.24.0",
     "ora": "^4.0.3",
-    "prompts": "^2.3.0"
+    "prompts": "^2.3.0",
+    "puppeteer": "^2.1.1"
   }
 }

@@ -3,14 +3,45 @@ import PLApiManager, {
   IAutorenewDealEntry,
 } from "./api-managers/pl-api-manager"
 
+import moment from "moment"
+
+import AuotBrowser from "./auto-browser"
+import AutoBrowser from "./auto-browser"
+
 /**
- * Handles data handling for gathering data to check if domains need to be auto renewed
+ * Handles data handling for gathering data to check if
+ * domains need to be auto renewed
  */
 export default class AutoRenewChecker {
+  /**
+   * Instance of Puppeteer runner for specific web tasks
+   */
+  private autoBrowser: AutoBrowser
+
+  constructor() {
+    this.autoBrowser = new AuotBrowser()
+  }
+
   /**
    * Test runner for debugging
    */
   public async runTest(): Promise<void> {
+    const start = moment()
+    console.log("running browser".yellow)
+    await this.autoBrowser.runAutoRenews([
+      "airconditioning-fortworth.net",
+      "theresponseteamllc.com",
+      "peakperfectioncontracting.com",
+    ])
+    console.log(
+      `Done in ${moment().diff(start, "seconds", true)} seconds`.green
+    )
+  }
+
+  /**
+   * Main runner method
+   */
+  public async run(): Promise<void> {
     const ncManager: NCApiManager = new NCApiManager(
       process.env.NC_APIKEY as string,
       process.env.NC_USER as string,
@@ -58,6 +89,22 @@ export default class AutoRenewChecker {
       }
     }
 
+    const extracedDomains = domainsToFlagForAutoRenew.map(
+      (obj: any) => obj.domain
+    )
+
     console.log(domainsToFlagForAutoRenew)
+
+    this.autoRenewBrowserRunBrowserTask(extracedDomains)
+  }
+
+
+  private async autoRenewBrowserRunBrowserTask(domains: string[]) {
+    const browserStartTime = moment()
+    console.log("running browser".yellow)
+    await this.autoBrowser.runAutoRenews(domains)
+    console.log(
+      `Done in ${moment().diff(browserStartTime, "seconds", true)} seconds`.green
+    )
   }
 }
