@@ -98,13 +98,19 @@ export default class AutoRenewChecker {
     this.autoRenewBrowserRunBrowserTask(extracedDomains)
   }
 
-
   private async autoRenewBrowserRunBrowserTask(domains: string[]) {
     const browserStartTime = moment()
     console.log("running browser".yellow)
     await this.autoBrowser.runAutoRenews(domains)
+    const isPlural = domains.length !== 1 ? "s" : ""
     console.log(
-      `Done in ${moment().diff(browserStartTime, "seconds", true)} seconds`.green
+      `Done.  Auto renewed ${
+        domains.length
+      } domain${isPlural} in ${moment().diff(
+        browserStartTime,
+        "seconds",
+        true
+      )} seconds`.green
     )
   }
 }
