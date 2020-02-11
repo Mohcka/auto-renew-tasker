@@ -59,8 +59,9 @@ export default class AutoRenewChecker {
   }
 
   /**
-   * Will created a filtered array of pipeline deals that aren't red who needs to have
-   * the registered domain's autorenew set to true if it already hasn't been
+   * Will created a filtered array of pipeline deals that
+   * aren't red who needs to have the registered domain's
+   * autorenew set to true if it already hasn't been
    * @param plData Fetched pipeline deals
    * @param ncData fetched namecheap domains
    */
