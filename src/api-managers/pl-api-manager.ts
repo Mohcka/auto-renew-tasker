@@ -193,6 +193,10 @@ export interface IAutorenewDealEntry {
     name: string
   }
   /**
+   * A simple red-yellow-green status for the deal. 1 = red, 2 = yellow, 3 = green.
+   */
+  status: number
+  /**
    * Determines what methoed the domain for the deal was purchased
    */
   domainPurchasedState: number
@@ -292,6 +296,7 @@ export default class PLApiManager {
               company: entry.company,
               domainPurchasedState: entry.custom_fields.custom_label_1457620,
               domainPurchasedDate: entry.custom_fields.custom_label_2154033,
+              status: entry.status,
             })
           }
         }

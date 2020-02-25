@@ -18,8 +18,20 @@ export default class AutoRenewChecker {
    */
   private autoBrowser: AutoBrowser
 
+  private ncManager: NCApiManager
+  private plManager: PLApiManager
+
   constructor() {
     this.autoBrowser = new AuotBrowser()
+    this.ncManager = new NCApiManager(
+      process.env.NC_APIKEY as string,
+      process.env.NC_USER as string,
+      process.env.NC_IP as string
+    )
+
+    this.plManager = new PLApiManager(
+      process.env.PIPELINE_DEALS_API_KEY as string
+    )
   }
 
   /**
@@ -42,18 +54,8 @@ export default class AutoRenewChecker {
    * Main runner method
    */
   public async run(): Promise<void> {
-    const ncManager: NCApiManager = new NCApiManager(
-      process.env.NC_APIKEY as string,
-      process.env.NC_USER as string,
-      process.env.NC_IP as string
-    )
-
-    const plManager: PLApiManager = new PLApiManager(
-      process.env.PIPELINE_DEALS_API_KEY as string
-    )
-
-    const fetchNCDomains: INamecheapDomain[] = await ncManager.getAllDomains()
-    const fetchPLDeals: IAutorenewDealEntry[] = await plManager.fetchPotentialAutoRenews()
+    const fetchNCDomains: INamecheapDomain[] = await this.ncManager.getAllDomains()
+    const fetchPLDeals: IAutorenewDealEntry[] = await this.plManager.fetchPotentialAutoRenews()
 
     this.performAutoRenewCheck(fetchPLDeals, fetchNCDomains)
   }
@@ -76,7 +78,10 @@ export default class AutoRenewChecker {
       const foundMatch = fetchedNCDomains.find(domain => {
         // If the domain is off for renewal, compare the domain name
         // and if there's a match, flag domain to swtich autorenew on
-        if (domain.AutoRenew.toLowerCase() === "false")
+        if (
+          domain.AutoRenew.toLowerCase() === "false" ||
+          domain.IsExpired.toLowerCase() === "true"
+        )
           return domain.Name === deal.domain
         // return false and default value to `undefined`
         return false
@@ -86,17 +91,37 @@ export default class AutoRenewChecker {
         domainsToFlagForAutoRenew.push({
           domain: foundMatch.Name,
           companyName: deal.company.name,
+          AutoRenew: foundMatch.AutoRenew,
+          IsExpired: foundMatch.IsExpired,
+          isValid: deal.status,
         })
       }
     }
 
-    const extracedDomains = domainsToFlagForAutoRenew.map(
-      (obj: any) => obj.domain
-    )
+    // Domains to run through the automated browser to flag
+    // for auto renew individually
+    const filteredAutoRenewDomains: string[] = []
+    // Domains to activate through the namecheap api
+    const domainsToActivate: string[] = []
+
+    // Splitting the array from domains to activate and domains to
+    // autorenew
+    for (const flaggedDomain of domainsToFlagForAutoRenew) {
+      if (flaggedDomain.IsExpired === "true") {
+        // Make an array of domain strings because that's what the
+        // NCAPI method accepts
+        domainsToActivate.push(flaggedDomain.domain as string)
+      } else {
+        filteredAutoRenewDomains.push(flaggedDomain.domain as string)
+      }
+    }
 
     console.log(domainsToFlagForAutoRenew)
-
-    this.autoRenewBrowserRunBrowserTask(extracedDomains)
+    console.log(domainsToActivate)
+    // Automate browaer to manually check autorenew on for the domains
+    this.autoRenewBrowserRunBrowserTask(filteredAutoRenewDomains)
+    // TODO: use api to purchase expired domains
+    // this.ncManager.reactivateDomains(domainsToActivate)
   }
 
   private async autoRenewBrowserRunBrowserTask(domains: string[]) {

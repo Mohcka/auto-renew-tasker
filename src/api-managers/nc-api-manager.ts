@@ -68,7 +68,7 @@ interface INamecheapAPI {
         /**
          * Array of domains received
          */
-        Domain: INamecheapDomain[]
+        Domain: INamecheapDomain[] | INamecheapDomain
       }
       /**
        * Object to list paging info
@@ -140,7 +140,7 @@ export default class NCApiManager {
    * Fetch a list of all domains owned by the user
    */
   public async getAllDomains(): Promise<INamecheapDomain[]> {
-    let totalPages: number = 0
+    let totalPages = 0
     const domains: INamecheapDomain[] = []
 
     // Get total number of pages
@@ -191,8 +191,14 @@ export default class NCApiManager {
           // Store the fetched domains into an array
           const fetchedDomains = parsedData.ApiResponse.CommandResponse
             .DomainGetListResult?.Domain!
-
-          domains.push(...fetchedDomains)
+          if ((fetchedDomains as INamecheapDomain[]).length) {
+            domains.push(...(fetchedDomains as INamecheapDomain[]))
+          } else {
+            domains.push(fetchedDomains as INamecheapDomain)
+          }
+        })
+        .catch(err => {
+          console.log(err)
         })
     }
 
@@ -200,6 +206,42 @@ export default class NCApiManager {
     this.spinner.succeed()
 
     return domains
+  }
+
+  /**
+   * Use the NC api to activate an array of registered domains that have
+   * been expired.
+   * @param domainsToActivate List of domains to activate
+   */
+  public async reactivateDomains(domainsToActivate: string[]) {
+    const now = moment()
+    let reactivatedCount = 0
+    this.spinner.start()
+    for (const domain of domainsToActivate) {
+      this.spinner.text = `Reactivating domains: ${domain} (${domainsToActivate.indexOf(
+        domain
+      ) + 1} of ${domainsToActivate.length})`
+      const apiReactivateURi = this.makeAPICallString(
+        "Command=namecheap.domains.reactivate",
+        "DomainName=" + domain,
+        "YearsToAdd=1",
+        "IsPremiumDomain=false"
+      )
+
+      await axios.get(apiReactivateURi).then(resp => {
+        const parsedData: any = xmlParser.parse(resp.data, {
+          ignoreAttributes: false,
+          attributeNamePrefix: "",
+        })
+
+        if (parsedData.ApiResponse.Errors.Error !== null) reactivatedCount++
+      })
+    }
+    this.spinner.text = `reactivated ${reactivatedCount} in ${moment().diff(
+      now,
+      "seconds",
+      true
+    )} seconds`
   }
 
   /**
