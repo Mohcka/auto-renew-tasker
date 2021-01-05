@@ -20,7 +20,7 @@
   "dependencies": {
     "@types/colors": "^1.2.1",
     "@types/puppeteer": "^2.0.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "colors": "^1.4.0",
     "dotenv": "^8.2.0",
     "fast-xml-parser": "^3.16.0",
